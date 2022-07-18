@@ -93,7 +93,7 @@ jobs:
           XLA_CLANG_CACHE_S3_BUCKET_NAME: ossci-compiler-clang-cache-circleci-xla
         timeout-minutes: 240
         run: |
-          set -x
+          set -ex
 
           if [[ $TEST_CONFIG == 'multigpu' ]]; then
             TEST_COMMAND=.jenkins/pytorch/multigpu-test.sh
@@ -112,7 +112,7 @@ jobs:
 
           trap 'kill "$jpid" 2>/dev/null' $(seq 0 15)
           python3 -m pip install psutil
-
+          python3 .github/scripts/monitor.py
           python3 .github/scripts/monitor.py &
           jpid="$!"
 
