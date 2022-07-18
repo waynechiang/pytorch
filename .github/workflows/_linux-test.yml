@@ -111,9 +111,9 @@ jobs:
           export PR_BODY="${PR_BODY//[$'\n\r']}"
 
           trap 'kill "$jpid" 2>/dev/null' $(seq 0 15)
-          pip install psutil
+          python3 -m pip install psutil
 
-          python .github/scripts/monitor.py &
+          python3 .github/scripts/monitor.py &
           jpid="$!"
 
           # detached container should get cleaned up by teardown_ec2_linux
