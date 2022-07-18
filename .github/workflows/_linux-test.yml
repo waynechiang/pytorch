@@ -111,6 +111,7 @@ jobs:
           export PR_BODY="${PR_BODY//[$'\n\r']}"
 
           trap 'kill "$jpid" 2>/dev/null' $(seq 0 15)
+          pip install psutil
 
           python .github/scripts/monitor.py &
           jpid="$!"
