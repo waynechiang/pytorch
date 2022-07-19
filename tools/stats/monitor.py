@@ -6,9 +6,6 @@ import sys
 import time
 from typing import Any, Dict, List
 
-import psutil  # type: ignore[import]
-import pynvml  # type: ignore[import]
-
 
 def pip_install(package_name: str) -> None:
     if (
@@ -22,49 +19,49 @@ def pip_install(package_name: str) -> None:
         )
 
 
-def get_processes_running_python_tests() -> List[Any]:
-    python_processes = []
-    for process in psutil.process_iter():
-        try:
-            if "python" in process.name() and process.cmdline():
-                python_processes.append(process)
-        except Exception:
-            # access denied
-            pass
-    return python_processes
-
-
-def get_per_process_cpu_info() -> List[Dict[str, Any]]:
-    processes = get_processes_running_python_tests()
-    per_process_info = []
-    for p in processes:
-        info = {
-            "pid": p.pid,
-            "cmd": " ".join(p.cmdline()),
-            "cpu_percent": p.cpu_percent(),
-            "rss_memory": p.memory_info().rss,
-            "uss_memory": p.memory_full_info().uss,
-        }
-        try:
-            info["pss_memory"] = p.memory_full_info().pss
-        except Exception:
-            pass
-        per_process_info.append(info)
-    return per_process_info
-
-
-def get_per_process_gpu_info(handle: Any) -> List[Dict[str, Any]]:
-    processes = pynvml.nvmlDeviceGetComputeRunningProcesses(handle)
-    per_process_info = []
-    for p in processes:
-        info = {"pid": p.pid, "gpu_memory": p.usedGpuMemory}
-        per_process_info.append(info)
-    return per_process_info
-
-
 def main() -> None:
     pip_install("psutil")
     pip_install("pynvml")
+    import psutil
+    import pynvml  # type: ignore[import]
+
+    def get_processes_running_python_tests() -> List[Any]:
+        python_processes = []
+        for process in psutil.process_iter():
+            try:
+                if "python" in process.name() and process.cmdline():
+                    python_processes.append(process)
+            except Exception:
+                # access denied
+                pass
+        return python_processes
+
+    def get_per_process_cpu_info() -> List[Dict[str, Any]]:
+        processes = get_processes_running_python_tests()
+        per_process_info = []
+        for p in processes:
+            info = {
+                "pid": p.pid,
+                "cmd": " ".join(p.cmdline()),
+                "cpu_percent": p.cpu_percent(),
+                "rss_memory": p.memory_info().rss,
+                "uss_memory": p.memory_full_info().uss,
+            }
+            try:
+                info["pss_memory"] = p.memory_full_info().pss
+            except Exception:
+                pass
+            per_process_info.append(info)
+        return per_process_info
+
+    def get_per_process_gpu_info(handle: Any) -> List[Dict[str, Any]]:
+        processes = pynvml.nvmlDeviceGetComputeRunningProcesses(handle)
+        per_process_info = []
+        for p in processes:
+            info = {"pid": p.pid, "gpu_memory": p.usedGpuMemory}
+            per_process_info.append(info)
+        return per_process_info
+
     handle = None
     try:
         pynvml.nvmlInit()
