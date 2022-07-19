@@ -110,9 +110,9 @@ jobs:
           export COMMIT_MESSAGES="${COMMIT_MESSAGES//[$'\n\r']}"
           export PR_BODY="${PR_BODY//[$'\n\r']}"
 
-          trap 'kill "$jpid" 2>/dev/null && cat test-reports/log.txt' $(seq 0 15)
-          mkdir test-reports
-          python3 -m tools.stats.monitor > test-reports/log.txt &
+          trap 'kill "$jpid" 2>/dev/null && cat test/test-reports/log.txt' $(seq 0 15)
+          mkdir test/test-reports
+          python3 -m tools.stats.monitor > test/test-reports/log.txt &
           jpid="$!"
 
           # detached container should get cleaned up by teardown_ec2_linux
