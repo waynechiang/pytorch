@@ -111,7 +111,7 @@ jobs:
           export PR_BODY="${PR_BODY//[$'\n\r']}"
 
           trap 'kill "$jpid" 2>/dev/null' $(seq 0 15)
-          python3 -m pip install psutil
+          python3 -m pip install psutil>=5.9.1
           mkdir test-reports
           python3 -m tools.stats.monitor > test-reports/log.txt &
           jpid="$!"
