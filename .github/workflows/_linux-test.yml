@@ -110,8 +110,7 @@ jobs:
           export COMMIT_MESSAGES="${COMMIT_MESSAGES//[$'\n\r']}"
           export PR_BODY="${PR_BODY//[$'\n\r']}"
 
-          trap 'kill "$jpid" 2>/dev/null' $(seq 0 15)
-          python3 -m pip install psutil>=5.9.1
+          trap 'kill "$jpid" 2>/dev/null && cat test-reports/log.txt' $(seq 0 15)
           mkdir test-reports
           python3 -m tools.stats.monitor > test-reports/log.txt &
           jpid="$!"
@@ -157,7 +156,6 @@ jobs:
             "${DOCKER_IMAGE}"
           )
           docker exec -t "${container_name}" sh -c "pip install dist/*.whl && ${TEST_COMMAND}"
-          cat test-reports/log.txt
 
       - name: Get workflow job id
         id: get-job-id
