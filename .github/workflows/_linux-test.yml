@@ -65,7 +65,7 @@ jobs:
 
       - name: Start monitoring script
         id: monitor-script
-        run: mkdir test/test-reports
+        run: |
           python3 -m tools.stats.monitor > usage_log.txt 2>&1 &
           echo "::set-output name=monitor-script-pid::${!}"
 
