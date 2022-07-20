@@ -67,7 +67,7 @@ jobs:
         id: monitor-script
         run: mkdir test/test-reports
           python3 -m tools.stats.monitor > usage_log.txt 2>&1 &
-          echo '::set-output name=monitor-script-pid::$!'
+          echo "::set-output name=monitor-script-pid::${!}"
 
       - name: Download build artifacts
         uses: ./.github/actions/download-build-artifacts
