@@ -63,6 +63,12 @@ jobs:
             bash .github/scripts/install_nvidia_utils_linux.sh
             echo "GPU_FLAG=--gpus all" >> "${GITHUB_ENV}"
 
+      - name: Start monitoring script
+        id: monitor-script
+        run: mkdir test/test-reports
+          python3 -m tools.stats.monitor > usage_log.txt 2>&1 &
+          echo '::set-output name=monitor-script-pid::$!'
+
       - name: Download build artifacts
         uses: ./.github/actions/download-build-artifacts
         with:
@@ -109,11 +115,6 @@ jobs:
           # variable copying. see https://github.com/pytorch/pytorch/pull/80043#issuecomment-1167796028
           export COMMIT_MESSAGES="${COMMIT_MESSAGES//[$'\n\r']}"
           export PR_BODY="${PR_BODY//[$'\n\r']}"
-
-          trap 'kill "$jpid" 2>/dev/null && cat test/test-reports/log.txt' $(seq 0 15)
-          mkdir test/test-reports
-          python3 -m tools.stats.monitor > test/test-reports/log.txt &
-          jpid="$!"
 
           # detached container should get cleaned up by teardown_ec2_linux
           # TODO: Stop building test binaries as part of the build phase
@@ -163,6 +164,13 @@ jobs:
         if: always()
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Stop monitoring script
+        if: always()
+        env:
+          MONITOR_SCRIPT_PID: ${{ steps.monitor-script.outputs.monitor-script-pid }}
+        run: |
+          kill "$MONITOR_SCRIPT_PID" && cat usage_log.txt
 
       - name: Upload test artifacts
         uses: ./.github/actions/upload-test-artifacts
